@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>RENDA LCS — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--green:#34d058;--bg:#f3f6f8;--card:#fff;--muted:#6b7280;--accent:#1f7a3a;--max-width:480px}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:'Poppins',system-ui,Arial,sans-serif;background:linear-gradient(180deg,#f8fbfa 0%,var(--bg)100%);color:#0f1724;display:flex;flex-direction:column;min-height:100vh;align-items:center}
+.site-bar{width:100%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;padding:8px 12px;height:56px;box-shadow:0 4px 10px rgba(52,208,88,0.12)}
+.site-bar h1{margin:0;font-weight:700;letter-spacing:1px;font-size:18px}
+main{flex:1;display:flex;align-items:center;justify-content:center;width:100%;padding:28px 16px}
+.card{width:100%;max-width:var(--max-width);background:var(--card);border-radius:12px;padding:28px;box-shadow:0 12px 30px rgba(15,23,42,0.08);border:1px solid rgba(15,23,42,0.04);text-align:center}
+h2{margin:0 0 6px 0;font-size:22px}
+.lead{color:var(--muted);font-size:13px;margin-bottom:18px}
+.form-group{margin-bottom:14px;text-align:left}
+label{display:block;font-size:13px;margin-bottom:6px;color:#374151}
+input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #e6e9ee;background:#fff;font-size:14px;outline:none}
+input:focus{box-shadow:0 8px 20px rgba(52,208,88,0.06);border-color:var(--green)}
+.toggle-pass{position:relative}
+.toggle-pass button{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:var(--muted);cursor:pointer;font-weight:600}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 18px;border-radius:10px;border:0;background:var(--green);color:#fff;font-weight:700;cursor:pointer;box-shadow:0 10px 24px rgba(52,208,88,0.14);width:100%;max-width:260px;margin:8px auto 0}
+.btn.ghost{background:#fff;color:var(--green);border:1px solid #e6e9ee;box-shadow:none}
+.link{color:var(--green);text-decoration:none;font-weight:600}
+.note{margin-top:14px;padding:12px;border-radius:10px;background:#f8fffa;border:1px solid #e6f3e6;color:#064e2a;font-size:13px;text-align:left}
+.center{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:12px}
+footer{width:100%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;padding:8px 12px;height:44px}
+footer p{margin:0;font-weight:600;font-size:13px}
+@media(max-width:480px){.card{padding:20px}}
+</style>
+</head>
+<body>
+<header class="site-bar"><h1>RENDA LCS</h1></header>
+
+<main>
+  <section class="card" aria-labelledby="login-title">
+    <h2 id="login-title">Entrar</h2>
+    <p class="lead">Use seu email e senha para acessar</p>
+
+    <form id="login-form" autocomplete="on">
+      <div class="form-group">
+        <label for="li-email">Email</label>
+        <input id="li-email" type="email" required autocomplete="username" />
+      </div>
+
+      <div class="form-group toggle-pass">
+        <label for="li-password">Senha</label>
+        <input id="li-password" type="password" required autocomplete="current-password" />
+        <button type="button" id="li-toggle" onclick="togglePassword('li-toggle','li-password')">Mostrar</button>
+      </div>
+
+      <button class="btn" type="submit">Entrar</button>
+      <a class="btn ghost" href="signup.html" role="button" style="margin-top:10px;max-width:260px">Criar conta</a>
+    </form>
+
+    <div class="center">
+      <a class="link" href="recover.html">Esqueci a senha / Recuperar conta</a>
+    </div>
+
+    <div id="login-msg" style="margin-top:12px"></div>
+  </section>
+</main>
+
+<footer class="site-bar"><p>PT_♧2026♧_PT</p></footer>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'renda_accounts';
+  const SESSION_KEY = 'renda_current';
+
+  function loadAccounts(){ const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : []; }
+  function saveAccounts(list){ localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }
+  function setCurrent(email){ localStorage.setItem(SESSION_KEY, email); }
+  function togglePassword(btnId,inputId){
+    const input=document.getElementById(inputId), btn=document.getElementById(btnId);
+    if(input.type==='password'){ input.type='text'; btn.textContent='Ocultar'; } else { input.type='password'; btn.textContent='Mostrar'; }
+  }
+  window.togglePassword = togglePassword;
+
+  function showMsg(text,isError){
+    const el=document.getElementById('login-msg');
+    el.innerHTML = '<div class="note" style="border-color:' + (isError? '#f5d6d6':'#e6f3e6') + ';background:' + (isError? '#fff6f6':'#f8fffa') + ';color:' + (isError? '#7a1f1f':'#064e2a') + '">'+ text +'</div>';
+  }
+
+  document.getElementById('login-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    const email = document.getElementById('li-email').value.trim().toLowerCase();
+    const password = document.getElementById('li-password').value;
+    if(!email || !password){ showMsg('Preencha email e senha.', true); return; }
+    const accounts = loadAccounts();
+    const acc = accounts.find(a => a.email === email && a.password === password);
+    if(!acc){ showMsg('Credenciais inválidas ou conta não existe. Verifique ou crie uma conta.', true); return; }
+    // salvar sessão e redirecionar para home
+    setCurrent(email);
+    showMsg('Bem-vindo, ' + acc.username + '! A redirecionar...', false);
+    setTimeout(()=> window.location.href = 'home.html', 800);
+  });
+
+  // se já logado, ir direto para home
+  const current = localStorage.getItem(SESSION_KEY);
+  if(current){ /* opcional: redirecionar automaticamente */ }
+})();
+</script>
+</body>
+</html>

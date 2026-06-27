@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RENDA LCS — Criar Conta</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--green:#34d058;--bg:#f3f6f8;--card:#fff;--muted:#6b7280;--accent:#1f7a3a;--max-width:520px}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Poppins',system-ui,Arial,sans-serif;background:linear-gradient(180deg,#f8fbfa 0%,var(--bg)100%);color:#0f1724;display:flex;flex-direction:column;min-height:100vh;align-items:center}
+    .site-bar{width:100%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;padding:10px 12px;height:56px;box-shadow:0 4px 10px rgba(52,208,88,0.12)}
+    .site-bar h1{margin:0;font-weight:700;letter-spacing:1px;font-size:18px}
+    main{flex:1;display:flex;align-items:center;justify-content:center;width:100%;padding:28px 16px}
+    .card{width:100%;max-width:var(--max-width);background:var(--card);border-radius:12px;padding:28px;box-shadow:0 12px 30px rgba(15,23,42,0.08);border:1px solid rgba(15,23,42,0.04);text-align:center}
+    h2{margin:0 0 6px 0;font-size:22px}
+    .lead{color:var(--muted);font-size:13px;margin-bottom:14px}
+    .form-group{margin-bottom:12px;text-align:left}
+    label{display:block;font-size:13px;margin-bottom:6px;color:#374151}
+    input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #e6e9ee;background:#fff;font-size:14px}
+    input:focus{box-shadow:0 8px 20px rgba(52,208,88,0.06);border-color:var(--green)}
+    .toggle-pass{position:relative}
+    .toggle-pass button{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:var(--muted);cursor:pointer;font-weight:600}
+    .btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 18px;border-radius:10px;border:0;background:var(--green);color:#fff;font-weight:700;cursor:pointer;box-shadow:0 10px 24px rgba(52,208,88,0.14);width:100%;max-width:260px;margin:8px auto 0}
+    .btn.ghost{background:#fff;color:var(--green);border:1px solid #e6e9ee;box-shadow:none}
+    .note{margin-top:14px;padding:12px;border-radius:10px;background:#f8fffa;border:1px solid #e6f3e6;color:#064e2a;font-size:13px;text-align:left}
+    .center{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:12px}
+    .copy-btn{background:var(--accent);color:#fff;border:0;padding:8px 10px;border-radius:8px;cursor:pointer}
+    footer{width:100%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;padding:8px 12px;height:44px}
+    footer p{margin:0;font-weight:600;font-size:13px}
+    @media(max-width:480px){.card{padding:20px}}
+  </style>
+</head>
+<body>
+  <header class="site-bar"><h1>RENDA LCS</h1></header>
+
+  <main>
+    <section class="card" aria-labelledby="signup-title">
+      <h2 id="signup-title">Criar Conta</h2>
+      <p class="lead">Crie sua conta e guarde o número de recuperação gerado</p>
+
+      <form id="signup-form" autocomplete="on">
+        <div class="form-group">
+          <label for="su-username">Nome de usuário</label>
+          <input id="su-username" type="text" required />
+        </div>
+
+        <div class="form-group">
+          <label for="su-email">Email</label>
+          <input id="su-email" type="email" required />
+        </div>
+
+        <div class="form-group toggle-pass">
+          <label for="su-password">Senha</label>
+          <input id="su-password" type="password" required />
+          <button type="button" id="su-toggle" onclick="togglePassword('su-toggle','su-password')">Mostrar</button>
+        </div>
+
+        <button class="btn" type="submit">Criar conta</button>
+        <a class="btn ghost" href="index.html" role="button" style="margin-top:10px;max-width:260px">Voltar ao login</a>
+      </form>
+
+      <div id="signup-result" style="margin-top:12px"></div>
+    </section>
+  </main>
+
+  <footer class="site-bar"><p>PT_♧2026♧_PT</p></footer>
+
+  <script>
+    (function(){
+      const STORAGE_KEY = 'renda_accounts';
+
+      function loadAccounts(){ const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : []; }
+      function saveAccounts(list){ localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }
+
+      function generateRecoveryNumber(){ return Math.floor(10000000 + Math.random()*90000000).toString(); }
+
+      function togglePassword(btnId, inputId){
+        const input = document.getElementById(inputId);
+        const btn = document.getElementById(btnId);
+        if(input.type === 'password'){ input.type = 'text'; btn.textContent = 'Ocultar'; }
+        else { input.type = 'password'; btn.textContent = 'Mostrar'; }
+      }
+      window.togglePassword = togglePassword;
+
+      function copyToClipboard(text){
+        navigator.clipboard?.writeText(text).then(()=>alert('Número copiado para a área de transferência'), ()=>alert('Não foi possível copiar'));
+      }
+      window.copyToClipboard = copyToClipboard;
+
+      function showResultElement(el){
+        const container = document.getElementById('signup-result');
+        container.innerHTML = '';
+        container.appendChild(el);
+      }
+
+      document.getElementById('signup-form').addEventListener('submit', function(e){
+        e.preventDefault();
+        const username = document.getElementById('su-username').value.trim();
+        const email = document.getElementById('su-email').value.trim().toLowerCase();
+        const password = document.getElementById('su-password').value;
+        if(!username || !email || !password){ alert('Preencha todos os campos'); return; }
+
+        const accounts = loadAccounts();
+        if(accounts.some(a => a.email === email)){ alert('Já existe uma conta com esse e-mail'); return; }
+
+        const recovery = generateRecoveryNumber();
+        accounts.push({ username, email, password, recovery });
+        saveAccounts(accounts);
+
+        // criar elemento seguro para mostrar o número (evita problemas de escape)
+        const note = document.createElement('div');
+        note.className = 'note';
+        const strong = document.createElement('strong');
+        strong.textContent = 'Conta criada com sucesso.';
+        note.appendChild(strong);
+        note.appendChild(document.createElement('br'));
+        note.appendChild(document.createTextNode('Guarde este número de recuperação para recuperar sua conta se perder os dados:'));
+        note.appendChild(document.createElement('br'));
+        const codeDiv = document.createElement('div');
+        codeDiv.style.marginTop = '8px';
+        codeDiv.style.fontSize = '16px';
+        codeDiv.style.fontWeight = '700';
+        codeDiv.style.color = '#064e2a';
+        codeDiv.textContent = recovery;
+        note.appendChild(codeDiv);
+        const center = document.createElement('div');
+        center.className = 'center';
+        center.style.marginTop = '10px';
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'copy-btn';
+        copyBtn.textContent = 'Copiar número';
+        copyBtn.type = 'button';
+        copyBtn.addEventListener('click', ()=> copyToClipboard(recovery));
+        center.appendChild(copyBtn);
+        note.appendChild(center);
+
+        showResultElement(note);
+        this.reset();
+      });
+
+      window._renda_utils = { loadAccounts, saveAccounts };
+    })();
+  </script>
+</body>
+</html>

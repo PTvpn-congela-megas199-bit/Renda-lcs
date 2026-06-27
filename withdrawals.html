@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RENDA LCS — Levantamentos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --accent:#34d058;--muted:#cfeee0;--warn:#ffb84d;
+      --bg-overlay: rgba(0,0,0,0.60);--card-radius:12px;--max-width:1100px;--gap:14px;--header-height:64px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:'Poppins',system-ui,Arial,sans-serif;color:#eafaf0}
+    body{background:url('background.jpg') center/cover no-repeat fixed;background-color:#050608;display:flex;flex-direction:column;min-height:100vh;padding-top:var(--header-height)}
+    .site-header{position:fixed;top:0;left:0;right:0;height:var(--header-height);display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:linear-gradient(90deg, rgba(0,0,0,0.65), rgba(0,0,0,0.35));z-index:40;border-bottom:1px solid rgba(255,255,255,0.03)}
+    .site-header h1{margin:0;color:var(--accent);font-weight:700}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:8px 12px;border-radius:10px;border:0;cursor:pointer;font-weight:700;background:var(--accent);color:#04260f}
+    .btn.ghost{background:transparent;color:#eafaf0;border:1px solid rgba(255,255,255,0.06)}
+    main{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:20px 16px 40px}
+    .wrap{width:100%;max-width:var(--max-width);display:grid;grid-template-columns:360px 1fr;gap:var(--gap);align-items:start}
+    .card{background: linear-gradient(180deg, var(--bg-overlay), rgba(0,0,0,0.35));border-radius:var(--card-radius);padding:18px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 18px 50px rgba(0,0,0,0.6)}
+    .balance{font-size:20px;font-weight:800;color:#dfffe6;margin-top:6px}
+    .small{font-size:13px;color:#cfeee0;margin-top:6px}
+    .countdown{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
+    .count-block{background:rgba(255,255,255,0.03);padding:10px 12px;border-radius:10px;min-width:84px;text-align:center;font-weight:700;color:#eafaf0}
+    .deposits-list{margin-top:12px;display:flex;flex-direction:column;gap:12px}
+    .deposit-item{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03)}
+    .deposit-left{display:flex;gap:12px;align-items:center;min-width:0}
+    .deposit-amount{font-weight:900;color:var(--accent);font-size:18px;min-width:90px}
+    .deposit-meta{display:flex;flex-direction:column;gap:6px;min-width:0}
+    .meta-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .meta-label{font-size:13px;color:#cfeee0;min-width:110px}
+    .meta-value{font-weight:700;color:#eafaf0}
+    .deposit-right{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+    .small-muted{font-size:13px;color:#cfeee0}
+    .withdraw-btn{padding:8px 12px;border-radius:10px;border:0;background:var(--warn);color:#04260f;font-weight:800;cursor:pointer}
+    .withdraw-btn[disabled]{opacity:0.5;cursor:not-allowed}
+    @media (max-width:920px){.wrap{grid-template-columns:1fr;gap:12px}.deposit-item{flex-direction:column;align-items:stretch}.deposit-right{align-items:flex-start}}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <h1>RENDA LCS</h1>
+    <div>
+      <a href="home.html" class="btn ghost" style="text-decoration:none">Voltar</a>
+      <a href="account.html" class="btn ghost" style="text-decoration:none">Minha Conta</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <aside class="card">
+        <h2 style="color:var(--accent);margin:0 0 8px 0">Resumo da Conta</h2>
+        <div class="balance" id="balance">0.00 MT</div>
+        <div class="small" id="first-deposit-info">Primeiro depósito: —</div>
+        <div style="margin-top:12px">
+          <div class="small">Dias ativo desde o primeiro depósito</div>
+          <div style="margin-top:8px;font-weight:800;font-size:18px" id="days-active">— dias</div>
+        </div>
+        <div style="margin-top:14px">
+          <div class="small">Próximo depósito elegível (contagem regressiva)</div>
+          <div class="countdown" aria-live="polite" id="countdown">
+            <div class="count-block" id="cd-days">0d</div>
+            <div class="count-block" id="cd-hours">00h</div>
+            <div class="count-block" id="cd-mins">00m</div>
+            <div class="count-block" id="cd-secs">00s</div>
+          </div>
+        </div>
+        <div id="withdraw-status" class="small" style="margin-top:12px;color:#ffd6a6"></div>
+      </aside>
+
+      <section class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <h3 style="margin:0;color:var(--accent)">Seus Depósitos</h3>
+          <div class="small-muted">10% por 24h — acumulado automaticamente por minuto</div>
+        </div>
+        <div class="deposits-list" id="deposits-list" aria-live="polite"></div>
+      </section>
+    </div>
+  </main>
+
+  <footer style="height:44px;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg, rgba(0,0,0,0.45), rgba(0,0,0,0.25));color:#cfeee0;font-weight:700">
+    PT_♧2026♧_PT
+  </footer>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'renda_accounts';
+  const SESSION_KEY = 'renda_current';
+  const DAILY_RATE = 0.10;
+  const MS_PER_DAY = 24 * 60 * 60 * 1000;
+  const MS_PER_MIN = 60 * 1000;
+  const WITHDRAW_WA = '+258855789422';
+  const WITHDRAW_FEE = 1;
+
+  const balanceEl = document.getElementById('balance');
+  const firstInfo = document.getElementById('first-deposit-info');
+  const daysActiveEl = document.getElementById('days-active');
+  const cdDays = document.getElementById('cd-days');
+  const cdHours = document.getElementById('cd-hours');
+  const cdMins = document.getElementById('cd-mins');
+  const cdSecs = document.getElementById('cd-secs');
+  const withdrawStatus = document.getElementById('withdraw-status');
+  const depositsList = document.getElementById('deposits-list');
+
+  function loadAccounts(){ const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : []; }
+  function saveAccounts(list){ localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }
+  function currentEmail(){ return localStorage.getItem(SESSION_KEY); }
+  function getAccount(){ const email = currentEmail(); if(!email) return null; return loadAccounts().find(a=>a.email===email) || null; }
+  function updateAccount(acc){ const list = loadAccounts(); const i = list.findIndex(x=>x.email===acc.email); if(i>-1){ list[i]=acc; saveAccounts(list); } }
+
+  function fmtDate(iso){ try{ return new Date(iso).toLocaleString(); }catch(e){ return iso || '—'; } }
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function requiredDaysForAmount(amount){ return (Number(amount) / 20) * 3; }
+  function formatDisplay(value){ const n = Number(value) || 0; if(Math.abs(n) < 1) return n.toFixed(3); return n.toFixed(2); }
+
+  function perMinuteAccrued(item){
+    const nowMs = Date.now();
+    const depositMs = new Date(item.date).getTime();
+    const requiredMs = requiredDaysForAmount(item.amount) * MS_PER_DAY;
+    const accrualEndMs = depositMs + requiredMs;
+    const lastCollectionMs = item.lastCollection ? new Date(item.lastCollection).getTime() : depositMs;
+    const upperMs = Math.min(nowMs, accrualEndMs);
+    const elapsedMs = Math.max(0, upperMs - lastCollectionMs);
+    const minutes = Math.floor(elapsedMs / MS_PER_MIN);
+    if(minutes <= 0) return { minutes: 0, available: 0, perMinute: 0, accrualEnded: upperMs >= accrualEndMs };
+    const principal = Number(item.principal ?? item.amount ?? 0);
+    const perMinute = principal * DAILY_RATE / 1440;
+    const available = perMinute * minutes;
+    return { minutes, available: Number(available.toFixed(8)), perMinute: Number(perMinute.toFixed(10)), accrualEnded: upperMs >= accrualEndMs };
+  }
+
+  function remainingMsForDeposit(item){
+    const depositDate = new Date(item.date).getTime();
+    const requiredMs = requiredDaysForAmount(item.amount) * MS_PER_DAY;
+    const elapsed = Date.now() - depositDate;
+    return Math.max(requiredMs - elapsed, 0);
+  }
+
+  // adiciona minutos completos a cada depósito e persiste
+  function autoCollectAllDeposits(){
+    const acc = getAccount();
+    if(!acc) return;
+    let changed = false;
+    if(!Array.isArray(acc.history)) acc.history = [];
+    acc.history.forEach(item=>{
+      if(item.type !== 'deposit') return;
+      if(typeof item.collected !== 'number') item.collected = Number(item.collected || 0);
+      if(!item.lastCollection) item.lastCollection = item.date;
+      const accr = perMinuteAccrued(item);
+      if(accr.minutes > 0 && accr.available > 0){
+        item.collected = Number((Number(item.collected) + accr.available).toFixed(8));
+        const lastMs = new Date(item.lastCollection).getTime();
+        item.lastCollection = new Date(lastMs + accr.minutes * MS_PER_MIN).toISOString();
+        changed = true;
+      }
+    });
+    if(changed) updateAccount(acc);
+  }
+
+  function renderDeposits(acc){
+    depositsList.innerHTML = '';
+    const deposits = Array.isArray(acc.history) ? acc.history.filter(h=>h.type==='deposit') : [];
+    if(deposits.length === 0){
+      const empty = document.createElement('div'); empty.className='deposit-item'; empty.style.justifyContent='center'; empty.textContent='Nenhum depósito registrado ainda.'; depositsList.appendChild(empty); return;
+    }
+
+    deposits.forEach(item=>{
+      if(!item.lastCollection) item.lastCollection = item.date;
+      if(typeof item.collected !== 'number') item.collected = Number(item.collected || 0);
+
+      const itemEl = document.createElement('div'); itemEl.className='deposit-item';
+      const left = document.createElement('div'); left.className='deposit-left';
+      const amountBox = document.createElement('div'); amountBox.className='deposit-amount'; amountBox.textContent = (item.amount||0) + ' MT';
+      const meta = document.createElement('div'); meta.className='deposit-meta';
+
+      const dateRow = document.createElement('div'); dateRow.className='meta-row';
+      const lblDate = document.createElement('div'); lblDate.className='meta-label'; lblDate.textContent='Data do depósito';
+      const valDate = document.createElement('div'); valDate.className='meta-value'; valDate.textContent = fmtDate(item.date);
+      dateRow.appendChild(lblDate); dateRow.appendChild(valDate);
+
+      const elapsedRow = document.createElement('div'); elapsedRow.className='meta-row';
+      const lblElapsed = document.createElement('div'); lblElapsed.className='meta-label'; lblElapsed.textContent='Tempo desde depósito';
+      const elapsedDays = Math.floor((Date.now() - new Date(item.date).getTime()) / MS_PER_DAY);
+      const valElapsed = document.createElement('div'); valElapsed.className='meta-value'; valElapsed.textContent = elapsedDays + (elapsedDays===1 ? ' dia' : ' dias');
+      elapsedRow.appendChild(lblElapsed); elapsedRow.appendChild(valElapsed);
+
+      const requiredRow = document.createElement('div'); requiredRow.className='meta-row';
+      const lblReq = document.createElement('div'); lblReq.className='meta-label'; lblReq.textContent='Prazo para levantar';
+      const reqDays = requiredDaysForAmount(item.amount);
+      const valReq = document.createElement('div'); valReq.className='meta-value'; valReq.textContent = reqDays + (reqDays===1 ? ' dia' : ' dias');
+      requiredRow.appendChild(lblReq); requiredRow.appendChild(valReq);
+
+      meta.appendChild(dateRow); meta.appendChild(elapsedRow); meta.appendChild(requiredRow);
+      left.appendChild(amountBox); left.appendChild(meta);
+
+      const right = document.createElement('div'); right.className='deposit-right';
+      const accrNow = perMinuteAccrued(item);
+      const availableNow = accrNow.available || 0;
+
+      const accruedRow = document.createElement('div'); accruedRow.style.display='flex'; accruedRow.style.flexDirection='column'; accruedRow.style.alignItems='flex-end';
+      const lblAcc = document.createElement('div'); lblAcc.className='small-muted'; lblAcc.textContent='A cada minuto (disponível agora)';
+      const valAcc = document.createElement('div'); valAcc.className='meta-value'; valAcc.textContent = accrNow.minutes>0 ? formatDisplay(availableNow)+' MT' : '0.000 MT';
+      accruedRow.appendChild(lblAcc); accruedRow.appendChild(valAcc);
+
+      const collectedRow = document.createElement('div'); collectedRow.style.display='flex'; collectedRow.style.flexDirection='column'; collectedRow.style.alignItems='flex-end';
+      const lblCollected = document.createElement('div'); lblCollected.className='small-muted'; lblCollected.textContent='Já acumulado';
+      const valCollected = document.createElement('div'); valCollected.className='meta-value'; valCollected.textContent = formatDisplay(item.collected)+' MT';
+      collectedRow.appendChild(lblCollected); collectedRow.appendChild(valCollected);
+
+      const totalAvailable = Number(item.amount) + Number(item.collected) + Number(availableNow);
+      const totalDisplay = formatDisplay(totalAvailable);
+
+      const accrualEndMs = new Date(item.date).getTime() + requiredDaysForAmount(item.amount) * MS_PER_DAY;
+      const canWithdraw = Date.now() >= accrualEndMs;
+
+      const withdrawBtn = document.createElement('button'); withdrawBtn.className='withdraw-btn';
+      withdrawBtn.textContent = canWithdraw ? ('Levantar ' + totalDisplay + ' MT') : 'Ainda não disponível';
+      withdrawBtn.disabled = !canWithdraw;
+      withdrawBtn.title = canWithdraw ? ('Taxa: ' + WITHDRAW_FEE + ' MT') : '';
+      withdrawBtn.addEventListener('click', ()=> withdrawDeposit(item, totalAvailable));
+
+      const lastAcc = document.createElement('div'); lastAcc.className='small-muted'; lastAcc.textContent = 'Última atualização: ' + (item.lastCollection ? fmtDate(item.lastCollection) : fmtDate(item.date));
+      const feeNote = document.createElement('div'); feeNote.className='small-muted'; feeNote.textContent = 'Taxa: ' + WITHDRAW_FEE + ' MT';
+
+      right.appendChild(accruedRow); right.appendChild(collectedRow); right.appendChild(lastAcc); right.appendChild(feeNote); right.appendChild(withdrawBtn);
+
+      itemEl.appendChild(left); itemEl.appendChild(right);
+      depositsList.appendChild(itemEl);
+    });
+  }
+
+  function withdrawDeposit(item, totalAvailable){
+    const acc = getAccount();
+    if(!acc) return;
+    const amountText = (Math.abs(totalAvailable) < 1) ? Number(totalAvailable).toFixed(3) : Number(totalAvailable).toFixed(2);
+    const text = 'Ola, quero levantar ' + amountText + 'MT🎭!';
+    const url = 'https://wa.me/' + WITHDRAW_WA.replace(/\D/g,'') + '?text=' + encodeURIComponent(text);
+    if(!Array.isArray(acc.history)) acc.history = [];
+    acc.history.push({ type: 'withdraw_request', amount: Number(totalAvailable.toFixed(8)), date: new Date().toISOString(), depositDate: item.date });
+    // marcar pending no depósito correspondente
+    for(let i=0;i<acc.history.length;i++){
+      const h = acc.history[i];
+      if(h.type === 'deposit' && h.date === item.date && Number(h.amount) === Number(item.amount)){
+        acc.history[i].pendingWithdraw = true;
+        break;
+      }
+    }
+    updateAccount(acc);
+    window.open(url, '_blank');
+    refreshUI();
+  }
+
+  // rotina automática: roda imediatamente e depois a cada 60s
+  function startAutoCollector(){
+    autoCollectAllDeposits();
+    setInterval(()=> {
+      autoCollectAllDeposits();
+      const acc = getAccount();
+      if(acc){
+        renderDeposits(acc);
+        const next = nextDepositRemainingMs(acc);
+        updateCountdownDisplay(next);
+        balanceEl.textContent = (acc.balance || 0).toFixed(2) + ' MT';
+      }
+    }, 60 * 1000);
+  }
+
+  function nextDepositRemainingMs(acc){
+    if(!acc || !Array.isArray(acc.history)) return null;
+    let next = null;
+    acc.history.forEach(item=>{
+      if(item.type !== 'deposit') return;
+      const rem = remainingMsForDeposit(item);
+      if(rem === 0){ next = 0; return; }
+      if(next === null || rem < next) next = rem;
+    });
+    return next;
+  }
+
+  function updateCountdownDisplay(ms){
+    if(ms === null || ms === undefined){ cdDays.textContent='0d'; cdHours.textContent='00h'; cdMins.textContent='00m'; cdSecs.textContent='00s'; return; }
+    const totalSecs = Math.floor(ms / 1000);
+    const days = Math.floor(totalSecs / (24*3600));
+    const hours = Math.floor((totalSecs % (24*3600)) / 3600);
+    const mins = Math.floor((totalSecs % 3600) / 60);
+    const secs = totalSecs % 60;
+    cdDays.textContent = days + 'd';
+    cdHours.textContent = pad(hours) + 'h';
+    cdMins.textContent = pad(mins) + 'm';
+    cdSecs.textContent = pad(secs) + 's';
+  }
+
+  function refreshUI(){
+    const acc = getAccount();
+    if(!acc){ alert('Faça login primeiro.'); window.location.href='index.html'; return; }
+    if(!Array.isArray(acc.history)) acc.history = [];
+    acc.history.forEach(h=>{
+      if(h.type === 'deposit'){
+        if(typeof h.principal !== 'number') h.principal = Number(h.amount) || 0;
+        if(!h.lastCollection) h.lastCollection = h.date;
+        if(typeof h.collected !== 'number') h.collected = Number(h.collected || 0);
+      }
+    });
+    updateAccount(acc);
+    balanceEl.textContent = (acc.balance || 0).toFixed(2) + ' MT';
+    firstInfo.textContent = acc.firstDeposit ? ('Primeiro depósito: ' + fmtDate(acc.firstDeposit)) : 'Primeiro depósito: —';
+    const daysActive = acc.firstDeposit ? Math.floor((Date.now() - new Date(acc.firstDeposit)) / MS_PER_DAY) : 0;
+    daysActiveEl.textContent = acc.firstDeposit ? (daysActive + (daysActive===1 ? ' dia' : ' dias')) : '— dias';
+    renderDeposits(acc);
+    const nextRemaining = nextDepositRemainingMs(acc);
+    updateCountdownDisplay(nextRemaining);
+    withdrawStatus.textContent = anyDepositEligible(acc) ? 'Há depósitos elegíveis para levantamento.' : (acc.history.filter(h=>h.type==='deposit').length ? 'Nenhum depósito ainda atingiu o prazo.' : 'Você ainda não fez um depósito.');
+  }
+
+  function anyDepositEligible(acc){
+    if(!acc || !Array.isArray(acc.history)) return false;
+    const now = Date.now();
+    return acc.history.some(item=>{
+      if(item.type !== 'deposit') return false;
+      const requiredMs = requiredDaysForAmount(item.amount) * MS_PER_DAY;
+      return (now - new Date(item.date).getTime()) >= requiredMs;
+    });
+  }
+
+  // inicialização
+  function init(){
+    const acc = getAccount();
+    if(!acc){ alert('Faça login primeiro.'); window.location.href='index.html'; return; }
+    if(!Array.isArray(acc.history)) acc.history = [];
+    acc.history.forEach(h=>{
+      if(h.type === 'deposit'){
+        if(typeof h.principal !== 'number') h.principal = Number(h.amount) || 0;
+        if(!h.lastCollection) h.lastCollection = h.date;
+        if(typeof h.collected !== 'number') h.collected = Number(h.collected || 0);
+      }
+    });
+    updateAccount(acc);
+    refreshUI();
+    startAutoCollector();
+
+    // atualização por segundo para contagem regressiva e "disponível agora"
+    setInterval(()=>{
+      const acc2 = getAccount();
+      if(!acc2) return;
+      const next = nextDepositRemainingMs(acc2);
+      updateCountdownDisplay(next);
+      renderDeposits(acc2);
+    }, 1000);
+
+    window.addEventListener('storage', (e)=>{
+      if(e.key === STORAGE_KEY || e.key === SESSION_KEY) refreshUI();
+    });
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RENDA LCS — Minha Conta</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--accent:#34d058;--muted:#cfeee0;--bg-overlay: rgba(0,0,0,0.55);--card-radius:14px;--max-width:720px}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:'Poppins',system-ui,Arial,sans-serif;color:#eafaf0}
+    body{background:url('background.jpg') center/cover no-repeat fixed;background-color:#050608;display:flex;flex-direction:column;min-height:100vh}
+    .site-header{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:linear-gradient(90deg, rgba(0,0,0,0.45), rgba(0,0,0,0.25));backdrop-filter: blur(6px)}
+    .site-header h1{margin:0;color:var(--accent);font-weight:700;font-size:18px}
+    main{flex:1;display:flex;align-items:center;justify-content:center;padding:28px 16px}
+    .card{width:100%;max-width:var(--max-width);background:linear-gradient(180deg,var(--bg-overlay),rgba(0,0,0,0.35));border-radius:var(--card-radius);padding:22px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 18px 50px rgba(0,0,0,0.6)}
+    .grid{display:grid;grid-template-columns:140px 1fr;gap:18px;align-items:start}
+    .avatar{width:120px;height:120px;border-radius:16px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
+    .avatar img{width:100%;height:100%;object-fit:cover;display:block}
+    .upload-label{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:#eafaf0;cursor:pointer;font-weight:700;font-size:13px}
+    .remove-photo{background:transparent;border:0;color:#ffd6a6;cursor:pointer;font-weight:700;font-size:13px;padding:6px 8px;border-radius:8px}
+    .details h2{margin:0 0 8px 0;color:var(--accent);font-size:18px}
+    .row{display:flex;gap:12px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+    .label{min-width:110px;color:#cfeee0;font-weight:700;font-size:13px}
+    .value{color:#eafaf0;font-weight:700;font-size:15px;word-break:break-word}
+    .actions{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:700;background:var(--accent);color:#04260f;box-shadow:0 10px 24px rgba(52,208,88,0.12);min-width:120px;text-align:center}
+    .btn.ghost{background:transparent;color:#eafaf0;border:1px solid rgba(255,255,255,0.06);box-shadow:none}
+    .btn.fullwidth{display:block;width:100%;padding:12px 16px;border-radius:12px;background:linear-gradient(180deg,#0b6bff,#0753d1);color:#fff;font-weight:800;border:0;cursor:pointer;margin-top:18px;text-align:center;box-shadow:0 12px 30px rgba(11,107,255,0.12)}
+    .small{font-size:13px;color:#cfeee0}
+    .history{margin-top:18px;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02)}
+    .history-row{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.03)}
+    .history-row:last-child{border-bottom:0}
+    @media (max-width:720px){.grid{grid-template-columns:1fr;align-items:center}.avatar{width:110px;height:110px}.label{min-width:100px}}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <h1>RENDA LCS</h1>
+    <div>
+      <a href="home.html" class="btn ghost" style="text-decoration:none">Voltar</a>
+      <button id="logout" class="btn ghost">Sair</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="card" aria-labelledby="account-title">
+      <div class="grid">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+          <div class="avatar" id="avatar-box" title="Foto de perfil">
+            <img id="avatar-img" alt="Foto de perfil" src="" style="display:none" />
+            <div id="avatar-placeholder" style="text-align:center;color:#cfeee0;font-weight:700;padding:8px">SEM FOTO</div>
+          </div>
+          <label class="upload-label" for="file-input" id="upload-label">Escolher foto</label>
+          <input id="file-input" type="file" accept="image/*" style="display:none" />
+          <button id="remove-photo" class="remove-photo" style="display:none">Remover foto</button>
+          <div class="small" style="text-align:center">A foto é salva localmente no seu navegador</div>
+        </div>
+
+        <div class="details" aria-labelledby="account-title">
+          <h2 id="account-title">Minha Conta</h2>
+
+          <div class="row"><div class="label">Username</div><div class="value" id="acc-username">—</div></div>
+          <div class="row"><div class="label">Email</div><div class="value" id="acc-email">—</div></div>
+          <div class="row"><div class="label">Senha</div><div class="value" id="acc-pass">—</div></div>
+          <div class="row"><div class="label">Saldo</div><div class="value" id="acc-balance">0.00 MT</div></div>
+          <div class="row"><div class="label">Último depósito</div><div class="value" id="acc-last">—</div></div>
+          <div class="row"><div class="label">Ativo há</div><div class="value" id="acc-days">— dias</div></div>
+
+          <div class="actions">
+            <a href="payment.html" class="btn" id="deposit-btn" style="text-decoration:none">Depositar</a>
+            <a href="withdrawals.html" class="btn ghost" id="withdrawals-link" style="text-decoration:none">Levantamentos</a>
+          </div>
+
+          <a id="more-sites" class="btn fullwidth" href="sites.html" role="button">VER MAIS SITES</a>
+
+          <div id="info-note" class="small" style="margin-top:12px;display:none"></div>
+
+          <div class="history" id="history" style="margin-top:18px"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer style="height:44px;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg, rgba(0,0,0,0.45), rgba(0,0,0,0.25));color:#cfeee0;font-weight:700">
+    PT_♧2026♧_PT
+  </footer>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'renda_accounts';
+  const SESSION_KEY = 'renda_current';
+  const MS_PER_DAY = 24 * 60 * 60 * 1000;
+  const DAILY_RATE = 0.05; // 5% daily
+
+  // DOM
+  const avatarImg = document.getElementById('avatar-img');
+  const avatarPlaceholder = document.getElementById('avatar-placeholder');
+  const fileInput = document.getElementById('file-input');
+  const uploadLabel = document.getElementById('upload-label');
+  const removeBtn = document.getElementById('remove-photo');
+  const usernameEl = document.getElementById('acc-username');
+  const emailEl = document.getElementById('acc-email');
+  const passEl = document.getElementById('acc-pass');
+  const balanceEl = document.getElementById('acc-balance');
+  const lastEl = document.getElementById('acc-last');
+  const daysEl = document.getElementById('acc-days');
+  const infoNote = document.getElementById('info-note');
+  const logoutBtn = document.getElementById('logout');
+  const historyEl = document.getElementById('history');
+
+  function loadAccounts(){ const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : []; }
+  function saveAccounts(list){ localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }
+  function currentEmail(){ return localStorage.getItem(SESSION_KEY); }
+  function getAccount(){ const email = currentEmail(); if(!email) return null; return loadAccounts().find(a=>a.email===email) || null; }
+  function updateAccount(acc){ const list = loadAccounts(); const i = list.findIndex(x=>x.email===acc.email); if(i>-1){ list[i]=acc; saveAccounts(list); } }
+
+  function fmtDate(iso){ if(!iso) return '—'; try{ return new Date(iso).toLocaleString(); }catch(e){ return iso; } }
+  function pad(n){ return String(n).padStart(2,'0'); }
+
+  // interest application (5% daily)
+  function applyDailyInterest(acc){
+    if(!acc) return;
+    if(!Array.isArray(acc.history)) acc.history = [];
+    const now = new Date();
+    let balanceDelta = 0;
+    let changed = false;
+    acc.history.forEach(item => {
+      if(item.type !== 'deposit') return;
+      if(typeof item.principal !== 'number') item.principal = Number(item.amount) || 0;
+      if(!item.lastAccrual) item.lastAccrual = item.date || new Date().toISOString();
+      const last = new Date(item.lastAccrual);
+      const days = Math.floor((now - last) / MS_PER_DAY);
+      if(days <= 0) return;
+      const principalOld = item.principal;
+      const principalNew = principalOld * Math.pow(1 + DAILY_RATE, days);
+      const diff = principalNew - principalOld;
+      item.principal = Number(principalNew.toFixed(8));
+      const newLast = new Date(last.getTime() + days * MS_PER_DAY);
+      item.lastAccrual = newLast.toISOString();
+      balanceDelta += diff;
+      changed = true;
+    });
+    if(changed){
+      acc.balance = (acc.balance || 0) + Number(balanceDelta.toFixed(8));
+      acc.balance = Number(acc.balance.toFixed(8));
+      updateAccount(acc);
+    }
+  }
+
+  function daysSince(iso){ if(!iso) return 0; const then = new Date(iso); const now = new Date(); const diff = now - then; return Math.floor(diff / MS_PER_DAY); }
+
+  function renderHistory(acc){
+    historyEl.innerHTML = '';
+    if(!Array.isArray(acc.history) || acc.history.length === 0){
+      const empty = document.createElement('div');
+      empty.className = 'history-row';
+      empty.style.justifyContent = 'center';
+      empty.textContent = 'Nenhum histórico ainda.';
+      historyEl.appendChild(empty);
+      return;
+    }
+    acc.history.slice().reverse().forEach(item=>{
+      const row = document.createElement('div');
+      row.className = 'history-row';
+      const left = document.createElement('div');
+      left.style.display = 'flex';
+      left.style.flexDirection = 'column';
+      left.style.gap = '4px';
+      const t = document.createElement('div');
+      t.textContent = item.type === 'deposit' ? 'Depósito' : (item.type === 'withdraw_request' ? 'Pedido de levantamento' : 'Levantamento');
+      t.style.fontWeight = '700';
+      const d = document.createElement('div');
+      d.textContent = fmtDate(item.date);
+      d.style.fontSize = '13px';
+      d.style.color = '#cfeee0';
+      left.appendChild(t);
+      left.appendChild(d);
+      const right = document.createElement('div');
+      right.style.textAlign = 'right';
+      const amt = document.createElement('div');
+      amt.textContent = item.amount ? (item.amount + ' MT') : (item.type === 'withdraw_request' ? '—' : '—');
+      amt.style.fontWeight = '800';
+      const princ = document.createElement('div');
+      princ.textContent = item.principal ? ('Atual: ' + Number(item.principal).toFixed(2) + ' MT') : '';
+      princ.style.fontSize = '13px';
+      princ.style.color = '#cfeee0';
+      right.appendChild(amt);
+      right.appendChild(princ);
+      row.appendChild(left);
+      row.appendChild(right);
+      historyEl.appendChild(row);
+    });
+  }
+
+  function showInfo(text, isError){
+    infoNote.style.display = 'block';
+    infoNote.textContent = text;
+    infoNote.style.borderColor = isError ? '#f5d6d6' : '#e6f3e6';
+    infoNote.style.background = isError ? 'rgba(255,230,230,0.04)' : 'rgba(0,255,120,0.04)';
+    clearTimeout(showInfo._t);
+    showInfo._t = setTimeout(()=> infoNote.style.display = 'none', 5000);
+  }
+
+  // profile photo handling
+  function handleFile(file){
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e){
+      const dataUrl = e.target.result;
+      const acc = getAccount();
+      if(!acc) return;
+      acc.photoDataUrl = dataUrl;
+      updateAccount(acc);
+      render();
+      showInfo('Foto de perfil atualizada.', false);
+    };
+    reader.readAsDataURL(file);
+  }
+  function removePhoto(){
+    const acc = getAccount();
+    if(!acc) return;
+    delete acc.photoDataUrl;
+    updateAccount(acc);
+    render();
+    showInfo('Foto removida.', false);
+  }
+
+  // render account
+  function render(){
+    const acc = getAccount();
+    if(!acc){ alert('Faça login primeiro.'); window.location.href='index.html'; return; }
+    applyDailyInterest(acc);
+    const acc2 = getAccount();
+    usernameEl.textContent = acc2.username || '—';
+    emailEl.textContent = acc2.email || '—';
+    passEl.textContent = acc2.password || '—';
+    balanceEl.textContent = (acc2.balance || 0).toFixed(2) + ' MT';
+    lastEl.textContent = acc2.lastDeposit ? (acc2.lastDeposit + ' MT') : '—';
+    daysEl.textContent = acc2.firstDeposit ? (daysSince(acc2.firstDeposit) + (daysSince(acc2.firstDeposit) === 1 ? ' dia' : ' dias')) : '— dias';
+    if(acc2.photoDataUrl){
+      avatarImg.src = acc2.photoDataUrl;
+      avatarImg.style.display = 'block';
+      avatarPlaceholder.style.display = 'none';
+      removeBtn.style.display = 'inline-block';
+    } else {
+      avatarImg.style.display = 'none';
+      avatarPlaceholder.style.display = 'block';
+      removeBtn.style.display = 'none';
+    }
+    renderHistory(acc2);
+  }
+
+  // events
+  uploadLabel.addEventListener('click', ()=> fileInput.click());
+  fileInput.addEventListener('change', (e)=>{
+    const f = e.target.files && e.target.files[0];
+    if(!f) return;
+    const maxMB = 4;
+    if(f.size > maxMB * 1024 * 1024){ showInfo('Arquivo muito grande. Use imagem menor que ' + maxMB + ' MB.', true); fileInput.value = ''; return; }
+    handleFile(f);
+    fileInput.value = '';
+  });
+  removeBtn.addEventListener('click', removePhoto);
+  logoutBtn.addEventListener('click', ()=>{ localStorage.removeItem(SESSION_KEY); alert('Sessão encerrada.'); window.location.href='index.html'; });
+
+  // init
+  render();
+  window.addEventListener('storage', (e)=>{ if(e.key === STORAGE_KEY || e.key === SESSION_KEY) render(); });
+})();
+</script>
+</body>
+</html>
